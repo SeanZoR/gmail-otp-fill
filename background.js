@@ -112,7 +112,6 @@ async function disconnect() {
 
 async function markUsed(id) {
   const { used = [] } = await chrome.storage.session.get('used');
-  const { autoPaste = true } = await chrome.storage.sync.get('autoPaste');
   await chrome.storage.session.set({ used: [...used, id].slice(-50) });
 }
 

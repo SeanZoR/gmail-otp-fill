@@ -1,0 +1,39 @@
+name: A site doesn't work
+description: The chip didn't show, showed the wrong code, or Paste didn't fill the field.
+labels: [site]
+body:
+  - type: input
+    id: site
+    attributes:
+      label: Site
+      description: The page address where you entered the code (no personal data in the URL, please).
+      placeholder: https://example.com/login/verify
+    validations:
+      required: true
+  - type: dropdown
+    id: what
+    attributes:
+      label: What happened
+      options:
+        - No chip appeared
+        - Wrong code
+        - Chip appeared, but Paste didn't fill the field
+        - Something else
+    validations:
+      required: true
+  - type: input
+    id: sender
+    attributes:
+      label: Sender address of the code email
+      placeholder: no-reply@example.com
+  - type: textarea
+    id: field
+    attributes:
+      label: The code field's HTML (optional)
+      description: Right-click the field → Inspect, then copy the <input> element. Remove anything personal.
+      render: html
+  - type: input
+    id: version
+    attributes:
+      label: Extension version
+      placeholder: 0.2.0

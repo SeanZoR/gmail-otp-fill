@@ -9,7 +9,7 @@ const NOT_A_CODE = /(order|invoice|receipt|ref|reference|account|acct|phone|tel|
 const CANDIDATE = /(?<![\w$€£¥#@+./:-])(\d{3}[ -]\d{3}|\d{4,8}|[A-Z0-9]{5,8})(?![\w%@/]|[.,:-]\w)/g;
 
 export function extractCode(subject = '', body = '') {
-  const text = `${subject}\n${body}`.replace(/ /g, ' ');
+  const text = `${subject}\n${body}`.replace(/\u00a0/g, ' ');
   const subjectEnd = subject.length;
   let best = null;
 

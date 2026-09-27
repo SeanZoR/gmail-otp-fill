@@ -1,6 +1,26 @@
 {
   "name": "gmail-otp-fill",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
-  "scripts": { "test": "node --test test/*.test.mjs" }
+  "description": "Chrome extension that finds email verification codes in your Gmail and fills them in.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SeanZoR/gmail-otp-fill.git"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.mjs",
+    "lint": "eslint .",
+    "check": "node scripts/check-version.mjs",
+    "build": "sh scripts/package.sh"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.11.0",
+    "globals": "^17.12.0"
+  }
 }

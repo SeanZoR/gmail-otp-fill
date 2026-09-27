@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Gmail OTP Fill",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Spots verification-code fields and offers the code from your Gmail. One click pastes it.",
   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwbhDrnTqPtzgJg7XesT479ruVmk6S3CDCrFH5QltT9ELGvZj27tC9XQELzXUi9z8yVa1v4IeQlgjt1FvNsnAZhvGsAeckYXutQcv4BI97pJ0Tq6663SsAhyCA7m7lUQJvc873scWR81lrFjXBp9hzSrxivHrA3vWsYp8SlM2I3D6zlpQK2ttyycNDfKRTYkKdgkicKhT30apkMMdkasby+O+OK6la3syBins8RPPGVhpNwpbFlXt6F6vW3AvYXjKadF7x3ybuwUmNwtiwaYpW0hJOAmNcOkmoGa4MFCy6ABedmuqVPsZ6aHtAy2ij0Gi/N220m6JyPmXBpSLn43ZHwIDAQAB",
   "permissions": [

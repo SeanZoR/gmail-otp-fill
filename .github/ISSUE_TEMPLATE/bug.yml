@@ -1,0 +1,19 @@
+name: Bug
+description: Something else is broken.
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened, and what did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+  - type: input
+    id: version
+    attributes:
+      label: Extension and Chrome version
+      placeholder: 0.2.0 on Chrome 149
