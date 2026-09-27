@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { extractCode, htmlToText, payloadText, rootDomain, matchesSite, senderDomain, dmarcPass, linkedHosts, hostInEmail } from '../extract.js';
+import { extractCode, htmlToText, payloadText, rootDomain, matchesSite, senderDomain, dmarcPass, linkedHosts, autoPasteHost } from '../extract.js';
 
 const code = (s, b) => extractCode(s, b)?.code ?? null;
 
@@ -65,13 +65,16 @@ test('dmarc must pass for the From domain', () => {
   assert.ok(!dmarcPass([], 'stripe.com'));
 });
 
-test('auto-paste needs the exact host linked in the email', () => {
+test('auto-paste: apex always, other subdomains only if linked', () => {
   const b64 = t => Buffer.from(t).toString('base64url');
-  const payload = { mimeType: 'text/html', body: { data: b64(
-    '<p>542603</p><a href="https://substack.com/sign-in?x=1">Sign in</a><a href="https://WWW.substack.com/tos">Terms</a>') } };
-  const hosts = linkedHosts(payload);
-  assert.ok(hostInEmail('substack.com', hosts));
-  assert.ok(hostInEmail('www.substack.com', hosts));
-  assert.ok(!hostInEmail('evil.substack.com', hosts));
-  assert.ok(!hostInEmail('substack.com.evil.io', hosts));
+  // Real Substack shape: the only link is a tracking redirect.
+  const substack = linkedHosts({ mimeType: 'text/html', body: { data: b64(
+    '<p>542603</p><a href="https://email.mg-tx1.substack.com/c/abc">Verify email</a>') } });
+  assert.ok(autoPasteHost('substack.com', substack));
+  assert.ok(autoPasteHost('www.substack.com', substack));
+  assert.ok(!autoPasteHost('evil.substack.com', substack));
+
+  const cf = linkedHosts({ mimeType: 'text/plain', body: { data: b64('Code 123456 https://fit.sean8.com/login') } });
+  assert.ok(autoPasteHost('fit.sean8.com', cf));
+  assert.ok(!autoPasteHost('other.sean8.com', cf));
 });

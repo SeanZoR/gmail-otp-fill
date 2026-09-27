@@ -84,10 +84,12 @@ export function linkedHosts(payload) {
     .map(m => m[1].toLowerCase().replace(/^www\./, '')));
 }
 
-// Auto-paste needs the exact page host to appear in the email. A code mailed by
-// substack.com links to substack.com, never to someone's evil.substack.com.
-export function hostInEmail(host = '', hosts = new Set()) {
-  return hosts.has(host.toLowerCase().replace(/^www\./, ''));
+// Is the page host safe to auto-paste into? The apex (substack.com, www.substack.com)
+// belongs to the company. Other subdomains may be user-made (evil.substack.com), so
+// those need the email to link to that exact host.
+export function autoPasteHost(host = '', hosts = new Set()) {
+  const h = host.toLowerCase().replace(/^www\./, '');
+  return h === rootDomain(h) || hosts.has(h);
 }
 
 // "login.stripe.com" -> "stripe.com", "shop.example.co.uk" -> "example.co.uk"

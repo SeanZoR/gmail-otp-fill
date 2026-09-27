@@ -9,13 +9,13 @@ A Chrome extension for sites that email you a sign-in code. It spots the code fi
 - **Spots the field.** It looks for `autocomplete="one-time-code"`, a row of 4–8 one-digit boxes, or a field named like "code", "OTP" or "verify" on a page that mentions email.
 - **Checks Gmail.** It reads mail from the last 10 minutes (read-only) and pulls out the code.
 - **Offers it only to the right site.** The chip appears only if the email's sender domain is the same as the site's (`stripe.com` mail on `*.stripe.com`), and Gmail says that domain passed DMARC. Click **Paste** to fill the field. It keeps checking for 3 minutes in case the email is slow.
-- **Auto-paste on an exact match.** If the email also links to the page's exact hostname, the code goes straight into the field and an **Undo** notice shows for 8 seconds. It only fills an empty field that's on screen, in the tab you're looking at, and it never presses Submit. You can turn it off in Options.
+- **Auto-paste on an exact match.** If the page is the site's main domain (`substack.com`), or a subdomain the email links to by name, the code goes straight into the field and an **Undo** notice shows for 8 seconds. It only fills an empty field that's on screen, in the tab you're looking at, and it never presses Submit. You can turn it off in Options.
 - **Toolbar button.** Shows the latest code from any sender, with its domain and a warning if it doesn't match the tab. Use it for services that email from a different domain.
 
 ## Security
 
 - **Phishing relay.** A fake "enter the code we emailed you" page never gets a chip. `stripe.help`, `stripe.com.evil.io` and forged From headers all fail the domain + DMARC check.
-- **User subdomains.** Auto-paste also needs the email to link to the page's exact hostname. So `evil.substack.com` gets nothing from a `substack.com` email, even though the domains match.
+- **User subdomains.** On a subdomain, auto-paste also needs the email to link to that exact hostname. So `evil.substack.com` never gets a code pasted on its own, even though the domains match.
 
 - Your mail goes straight from Google to your browser. There's no server, analytics or telemetry.
 - It uses **your own** Google OAuth client, so no third party ever gets access to your inbox.

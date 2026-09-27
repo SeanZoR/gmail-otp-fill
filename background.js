@@ -1,4 +1,4 @@
-import { extractCode, payloadText, matchesSite, senderDomain, dmarcPass, linkedHosts, hostInEmail } from './extract.js';
+import { extractCode, payloadText, matchesSite, senderDomain, dmarcPass, linkedHosts, autoPasteHost } from './extract.js';
 
 const SCOPE = 'https://www.googleapis.com/auth/gmail.readonly';
 const LOOKBACK_SECONDS = 10 * 60;
@@ -87,7 +87,7 @@ async function findCode(host, anyDomain) {
       verified,
       at: Number(msg.internalDate),
       siteMatch,
-      auto: autoPaste && siteMatch && hostInEmail(host, linkedHosts(msg.payload)),
+      auto: autoPaste && siteMatch && autoPasteHost(host, linkedHosts(msg.payload)),
     };
     if (!best || found.siteMatch > best.siteMatch ||
         (found.siteMatch === best.siteMatch && found.at > best.at)) best = found;
