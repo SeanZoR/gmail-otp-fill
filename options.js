@@ -5,8 +5,9 @@ $('redirect').textContent = chrome.identity.getRedirectURL();
 $('copy').onclick = () => navigator.clipboard.writeText($('redirect').textContent);
 
 async function refresh() {
-  const { clientId = '', email } = await chrome.storage.sync.get(['clientId', 'email']);
+  const { clientId = '', email, autoPaste = true } = await chrome.storage.sync.get(['clientId', 'email', 'autoPaste']);
   $('clientId').value = clientId;
+  $('autoPaste').checked = autoPaste;
   $('status').textContent = email ? `Connected as ${email}.` : 'Not connected.';
   $('connect').disabled = !clientId;
   $('disconnect').hidden = !email;
@@ -16,6 +17,8 @@ $('save').onclick = async () => {
   await chrome.storage.sync.set({ clientId: $('clientId').value.trim() });
   refresh();
 };
+
+$('autoPaste').onchange = () => chrome.storage.sync.set({ autoPaste: $('autoPaste').checked });
 
 $('connect').onclick = async () => {
   $('status').textContent = 'Waiting for Google…';

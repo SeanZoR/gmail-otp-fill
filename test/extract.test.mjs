@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { extractCode, htmlToText, payloadText, rootDomain, matchesSite, senderDomain, dmarcPass } from '../extract.js';
+import { extractCode, htmlToText, payloadText, rootDomain, matchesSite, senderDomain, dmarcPass, linkedHosts, hostInEmail } from '../extract.js';
 
 const code = (s, b) => extractCode(s, b)?.code ?? null;
 
@@ -63,4 +63,15 @@ test('dmarc must pass for the From domain', () => {
   assert.ok(!dmarcPass([ok.replace('dmarc=pass', 'dmarc=fail')], 'stripe.com'));
   assert.ok(!dmarcPass([ok], 'evil.io'));
   assert.ok(!dmarcPass([], 'stripe.com'));
+});
+
+test('auto-paste needs the exact host linked in the email', () => {
+  const b64 = t => Buffer.from(t).toString('base64url');
+  const payload = { mimeType: 'text/html', body: { data: b64(
+    '<p>542603</p><a href="https://substack.com/sign-in?x=1">Sign in</a><a href="https://WWW.substack.com/tos">Terms</a>') } };
+  const hosts = linkedHosts(payload);
+  assert.ok(hostInEmail('substack.com', hosts));
+  assert.ok(hostInEmail('www.substack.com', hosts));
+  assert.ok(!hostInEmail('evil.substack.com', hosts));
+  assert.ok(!hostInEmail('substack.com.evil.io', hosts));
 });

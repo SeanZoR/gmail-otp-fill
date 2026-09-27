@@ -49,25 +49,51 @@
     if (document.visibilityState === 'visible') {
       const r = await send({ type: 'find', host: location.hostname });
       if (!target || dismissed) return;
-      if (r?.ok && r.result) return showCode(r.result);
+      if (r?.ok && r.result) return r.result.auto && canAutoPaste() ? autoPaste(r.result) : showCode(r.result);
       if (r?.error === 'NEED_AUTH') return showAction('Connect Gmail to fill codes', 'connect');
       if (r?.error === 'NO_CLIENT_ID') return showAction('Set up Gmail OTP Fill', 'options');
     }
     if (++polls < POLL_MAX) pollTimer = setTimeout(poll, POLL_MS);
   }
 
+  // Set through the native setter so React/Vue inputs notice the change.
+  const nativeSetter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set;
+  function setValue(el, v) {
+    el.focus();
+    nativeSetter.call(el, v);
+    el.dispatchEvent(new Event('input', { bubbles: true }));
+    el.dispatchEvent(new Event('change', { bubbles: true }));
+  }
+
   function fill(code) {
-    const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set;
-    const set = (el, v) => {
-      el.focus();
-      setter.call(el, v);
-      el.dispatchEvent(new Event('input', { bubbles: true }));
-      el.dispatchEvent(new Event('change', { bubbles: true }));
-    };
     const { boxes } = target;
-    if (boxes.length === 1) set(boxes[0], code);
-    else [...code].forEach((c, i) => boxes[i] && set(boxes[i], c));
+    if (boxes.length === 1) setValue(boxes[0], code);
+    else [...code].forEach((c, i) => boxes[i] && setValue(boxes[i], c));
     navigator.clipboard?.writeText(code).catch(() => {});
+  }
+
+  // Only into an empty field you can see, in the tab you're looking at.
+  function canAutoPaste() {
+    const el = target.boxes[0];
+    const r = el.getBoundingClientRect();
+    return document.visibilityState === 'visible' && document.hasFocus() &&
+      target.boxes.every(b => !b.value) &&
+      r.bottom > 0 && r.top < innerHeight && r.right > 0 && r.left < innerWidth;
+  }
+
+  function autoPaste(found) {
+    fill(found.code);
+    send({ type: 'used', id: found.id });
+    const root = makeChip(`✓ Pasted <span class="code">${esc(found.code)}</span>
+      <span class="from">from ${esc(found.domain)}</span>
+      <button class="go">Undo</button>`);
+    root.querySelector('.go').onclick = () => {
+      target.boxes.forEach(b => setValue(b, ''));
+      target.boxes[0].focus();
+      dismissed = true;
+      removeChip();
+    };
+    setTimeout(() => { if (chip?.root === root) { dismissed = true; removeChip(); } }, 8000);
   }
 
   function makeChip(html) {

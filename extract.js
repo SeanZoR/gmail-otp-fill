@@ -57,8 +57,7 @@ function decodeBase64Url(data) {
   return new TextDecoder().decode(Uint8Array.from(bin, c => c.charCodeAt(0)));
 }
 
-// Walk a Gmail API payload and return its text, preferring text/plain.
-export function payloadText(payload) {
+function payloadBodies(payload) {
   const plain = [], html = [];
   (function walk(p) {
     if (!p) return;
@@ -68,7 +67,27 @@ export function payloadText(payload) {
     }
     (p.parts || []).forEach(walk);
   })(payload);
+  return { plain, html };
+}
+
+// Walk a Gmail API payload and return its text, preferring text/plain.
+export function payloadText(payload) {
+  const { plain, html } = payloadBodies(payload);
   return plain.length ? plain.join('\n') : htmlToText(html.join('\n'));
+}
+
+// Every hostname the email links to, "www." stripped.
+export function linkedHosts(payload) {
+  const { plain, html } = payloadBodies(payload);
+  const text = [...plain, ...html].join('\n');
+  return new Set([...text.matchAll(/https?:\/\/([a-z0-9.-]+)/gi)]
+    .map(m => m[1].toLowerCase().replace(/^www\./, '')));
+}
+
+// Auto-paste needs the exact page host to appear in the email. A code mailed by
+// substack.com links to substack.com, never to someone's evil.substack.com.
+export function hostInEmail(host = '', hosts = new Set()) {
+  return hosts.has(host.toLowerCase().replace(/^www\./, ''));
 }
 
 // "login.stripe.com" -> "stripe.com", "shop.example.co.uk" -> "example.co.uk"

@@ -8,7 +8,7 @@
     window.lastMsg = msg;
     if (msg.type === 'find') calls++;
     setTimeout(() => cb(msg.type === 'find'
-      ? { ok: true, result: calls < 2 ? null : { id: 'm1', code: '482913', sender: 'Acme', subject: 'Your code', at: Date.now() } }
+      ? { ok: true, result: calls < 2 ? null : { id: 'm1', code: '482913', sender: 'Acme', domain: 'acme.com', subject: 'Your code', at: Date.now(), auto: new URLSearchParams(location.search).has('auto') } }
       : { ok: true }), 10);
   } } };
 </script>

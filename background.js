@@ -1,4 +1,4 @@
-import { extractCode, payloadText, matchesSite, senderDomain, dmarcPass } from './extract.js';
+import { extractCode, payloadText, matchesSite, senderDomain, dmarcPass, linkedHosts, hostInEmail } from './extract.js';
 
 const SCOPE = 'https://www.googleapis.com/auth/gmail.readonly';
 const LOOKBACK_SECONDS = 10 * 60;
@@ -57,6 +57,7 @@ async function findCode(host, anyDomain) {
   if (!list.messages) return null;
 
   const { used = [] } = await chrome.storage.session.get('used');
+  const { autoPaste = true } = await chrome.storage.sync.get('autoPaste');
   const msgs = await Promise.all(
     list.messages
       .filter(m => !used.includes(m.id))
@@ -86,6 +87,7 @@ async function findCode(host, anyDomain) {
       verified,
       at: Number(msg.internalDate),
       siteMatch,
+      auto: autoPaste && siteMatch && hostInEmail(host, linkedHosts(msg.payload)),
     };
     if (!best || found.siteMatch > best.siteMatch ||
         (found.siteMatch === best.siteMatch && found.at > best.at)) best = found;
@@ -110,6 +112,7 @@ async function disconnect() {
 
 async function markUsed(id) {
   const { used = [] } = await chrome.storage.session.get('used');
+  const { autoPaste = true } = await chrome.storage.sync.get('autoPaste');
   await chrome.storage.session.set({ used: [...used, id].slice(-50) });
 }
 
