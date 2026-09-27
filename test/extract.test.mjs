@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { extractCode, htmlToText, payloadText, rootDomain, matchesSite } from '../extract.js';
+import { extractCode, htmlToText, payloadText, rootDomain, matchesSite, senderDomain, dmarcPass } from '../extract.js';
 
 const code = (s, b) => extractCode(s, b)?.code ?? null;
 
@@ -39,10 +39,28 @@ test('gmail payload decoding', () => {
   assert.equal(payloadText(payload), 'Code: 111222');
 });
 
-test('site matching', () => {
+test('site matching is strict', () => {
   assert.equal(rootDomain('login.stripe.com'), 'stripe.com');
   assert.equal(rootDomain('shop.example.co.uk'), 'example.co.uk');
   assert.ok(matchesSite('Stripe <no-reply@stripe.com>', 'dashboard.stripe.com'));
   assert.ok(matchesSite('Notion Team <notify@mail.notion.so>', 'www.notion.so'));
   assert.ok(!matchesSite('GitHub <noreply@github.com>', 'stripe.com'));
+});
+
+test('look-alike phishing sites get nothing', () => {
+  const stripe = 'Stripe <no-reply@stripe.com>';
+  for (const host of ['stripe.help', 'stripe-login.com', 'stripe.com.evil.io', 'evil.io', 'xn--strpe-9ua.com'])
+    assert.ok(!matchesSite(stripe, host), host);
+  // display name can't fake the domain
+  assert.ok(!matchesSite('"no-reply@stripe.com" <attacker@evil.io>', 'stripe.com'));
+  assert.equal(senderDomain('"no-reply@stripe.com" <attacker@evil.io>'), 'evil.io');
+});
+
+test('dmarc must pass for the From domain', () => {
+  const ok = 'mx.google.com; dkim=pass header.i=@stripe.com; spf=pass smtp.mailfrom=bounce.stripe.com; dmarc=pass (p=REJECT sp=REJECT dis=NONE) header.from=stripe.com';
+  assert.ok(dmarcPass([ok], 'stripe.com'));
+  assert.ok(dmarcPass([ok], 'mail.stripe.com'));
+  assert.ok(!dmarcPass([ok.replace('dmarc=pass', 'dmarc=fail')], 'stripe.com'));
+  assert.ok(!dmarcPass([ok], 'evil.io'));
+  assert.ok(!dmarcPass([], 'stripe.com'));
 });

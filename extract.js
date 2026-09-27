@@ -80,11 +80,23 @@ export function rootDomain(host = '') {
   return parts.slice(-n).join('.');
 }
 
-// Does this email look like it came from the site the user is on?
+export function senderDomain(fromHeader = '') {
+  return ((fromHeader.match(/@([\w.-]+)>?\s*$/) || [])[1] || '').toLowerCase();
+}
+
+// Gmail's own verdict that the From domain is real (DMARC pass, aligned with From).
+export function dmarcPass(authResults = [], fromDomain = '') {
+  const root = rootDomain(fromDomain);
+  return authResults.some(h => {
+    const from = (h.match(/dmarc=pass[^;]*header\.from=([\w.-]+)/i) || [])[1];
+    return from && rootDomain(from) === root;
+  });
+}
+
+// Strict: the sender's registered domain must equal the site's. No brand-name guessing,
+// so a look-alike page (stripe.help) never gets a code meant for stripe.com.
 export function matchesSite(fromHeader = '', host = '') {
   if (!host) return false;
-  const site = rootDomain(host);
-  const brand = site.split('.')[0];
-  const addr = (fromHeader.match(/@([\w.-]+)/) || [])[1] || '';
-  return rootDomain(addr) === site || (brand.length > 2 && fromHeader.toLowerCase().includes(brand));
+  const from = senderDomain(fromHeader);
+  return !!from && rootDomain(from) === rootDomain(host);
 }

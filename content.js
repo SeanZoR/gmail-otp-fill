@@ -96,7 +96,7 @@
 
   function showCode(found) {
     const root = makeChip(`✉️ <span class="code">${esc(found.code)}</span>
-      <span class="from" title="${esc(found.subject)}">${esc(found.sender)}</span>
+      <span class="from" title="${esc(found.sender)}: ${esc(found.subject)}">from ${esc(found.domain)}</span>
       <button class="go">Paste</button>`);
     root.querySelector('.go').onclick = () => {
       fill(found.code);

@@ -1,4 +1,4 @@
-import { extractCode, payloadText, matchesSite } from './extract.js';
+import { extractCode, payloadText, matchesSite, senderDomain, dmarcPass } from './extract.js';
 
 const SCOPE = 'https://www.googleapis.com/auth/gmail.readonly';
 const LOOKBACK_SECONDS = 10 * 60;
@@ -46,8 +46,10 @@ async function gmail(path, token) {
   return res.json();
 }
 
-// Newest code from the last 10 minutes, preferring mail from the site you're on.
-async function findCode(host) {
+// Newest code from the last 10 minutes.
+// In a page (anyDomain=false): only codes whose verified sender domain equals the site's.
+// In the toolbar popup (anyDomain=true): any sender, shown with its domain.
+async function findCode(host, anyDomain) {
   const token = await getToken(false);
   const after = Math.floor(Date.now() / 1000) - LOOKBACK_SECONDS;
   const q = encodeURIComponent(`after:${after} -from:me`);
@@ -63,9 +65,15 @@ async function findCode(host) {
 
   let best = null;
   for (const msg of msgs) {
-    const header = name => msg.payload.headers.find(h => h.name.toLowerCase() === name)?.value || '';
+    const headers = msg.payload.headers;
+    const header = name => headers.find(h => h.name.toLowerCase() === name)?.value || '';
     const subject = header('subject');
     const from = header('from');
+    const domain = senderDomain(from);
+    const verified = dmarcPass(
+      headers.filter(h => h.name.toLowerCase() === 'authentication-results').map(h => h.value), domain);
+    const siteMatch = verified && matchesSite(from, host);
+    if (!anyDomain && !siteMatch) continue;
     const hit = extractCode(subject, payloadText(msg.payload));
     if (!hit) continue;
 
@@ -74,8 +82,10 @@ async function findCode(host) {
       code: hit.code,
       sender: from.replace(/\s*<.*>$/, '').replace(/"/g, '') || from,
       subject,
+      domain,
+      verified,
       at: Number(msg.internalDate),
-      siteMatch: matchesSite(from, host),
+      siteMatch,
     };
     if (!best || found.siteMatch > best.siteMatch ||
         (found.siteMatch === best.siteMatch && found.at > best.at)) best = found;
@@ -104,7 +114,7 @@ async function markUsed(id) {
 }
 
 const handlers = {
-  find: m => findCode(m.host),
+  find: m => findCode(m.host, m.anyDomain === true),
   connect: () => connect(),
   disconnect: () => disconnect(),
   used: m => markUsed(m.id),

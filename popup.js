@@ -14,15 +14,19 @@ async function load() {
   $('action').hidden = true;
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   const host = tab?.url ? new URL(tab.url).hostname : '';
-  const r = await send({ type: 'find', host });
+  const r = await send({ type: 'find', host, anyDomain: true });
 
   if (r.ok && r.result) {
-    const { code, sender, at } = r.result;
+    const { code, sender, domain, verified, siteMatch, at } = r.result;
     const mins = Math.max(0, Math.round((Date.now() - at) / 60000));
     $('msg').hidden = true;
     $('found').hidden = false;
     $('code').textContent = code;
-    $('from').textContent = `${sender} · ${mins} min ago`;
+    $('from').textContent = `${sender} (${domain}) · ${mins} min ago`;
+    $('warn').hidden = siteMatch;
+    $('warn').textContent = verified
+      ? `Sent by ${domain}, not the site in this tab. Only paste it on ${domain}.`
+      : `Gmail could not verify this sender. Be careful where you paste it.`;
     $('copyCode').onclick = async () => {
       await navigator.clipboard.writeText(code);
       $('copyCode').textContent = 'Copied';

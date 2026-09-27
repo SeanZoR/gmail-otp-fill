@@ -7,11 +7,13 @@ A Chrome extension for sites that email you a sign-in code. It spots the code fi
 ## How it works
 
 - **Spots the field.** It looks for `autocomplete="one-time-code"`, a row of 4–8 one-digit boxes, or a field named like "code", "OTP" or "verify" on a page that mentions email.
-- **Checks Gmail.** It reads mail from the last 10 minutes (read-only) and pulls out the code. If an email came from the site you're on, that one wins. Otherwise the newest code wins.
-- **Offers it.** A small chip appears under the field. Click **Paste** to fill the field and copy the code to your clipboard. It keeps checking for 3 minutes in case the email is slow.
-- **Toolbar button.** Shows the latest code with a Copy button, for pages it doesn't recognize.
+- **Checks Gmail.** It reads mail from the last 10 minutes (read-only) and pulls out the code.
+- **Offers it only to the right site.** The chip appears only if the email's sender domain is the same as the site's (`stripe.com` mail on `*.stripe.com`), and Gmail says that domain passed DMARC. Click **Paste** to fill the field. It keeps checking for 3 minutes in case the email is slow.
+- **Toolbar button.** Shows the latest code from any sender, with its domain and a warning if it doesn't match the tab. Use it for services that email from a different domain.
 
-## Privacy
+## Security
+
+- **Phishing relay.** A fake "enter the code we emailed you" page never gets a chip. `stripe.help`, `stripe.com.evil.io` and forged From headers all fail the domain + DMARC check.
 
 - Your mail goes straight from Google to your browser. There's no server, analytics or telemetry.
 - It uses **your own** Google OAuth client, so no third party ever gets access to your inbox.
