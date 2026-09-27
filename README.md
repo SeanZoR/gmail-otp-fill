@@ -25,10 +25,10 @@ A Chrome extension for sites that email you a sign-in code. It spots the code fi
 2. The setup page opens from the extension's **Options**. It walks you through creating a Google OAuth client:
    - Create a Google Cloud project and enable the Gmail API.
    - In Google Auth Platform, pick **External** and add your Gmail address as a **test user**.
-   - Create a **Web application** client. Use the redirect URI shown on the setup page (`https://<extension-id>.chromiumapp.org/`).
+   - Create a **Web application** client with this redirect URI: `https://mnajiabfjdigihpcnfjjhlpkefioacai.chromiumapp.org/`
    - Paste the client ID, then click **Connect Gmail**.
 
-The extension ID of an unpacked extension depends on its folder path. If you move the folder, update the redirect URI.
+The `key` in `manifest.json` pins the extension ID, so the redirect URI stays the same wherever you put the folder.
 
 ## Develop
 
