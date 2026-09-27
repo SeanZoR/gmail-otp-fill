@@ -1,0 +1,19 @@
+:root { --bg: #fff; --fg: #1f1f1f; --muted: #5f6368; --line: #dadce0; --accent: #0b57d0; --on-accent: #fff; }
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #1f1f1f; --fg: #e8eaed; --muted: #9aa0a6; --line: #3c4043; --accent: #8ab4f8; --on-accent: #000; }
+}
+body { margin: 0; background: var(--bg); color: var(--fg); font: 14px/1.5 system-ui, sans-serif; }
+main { padding: 16px; min-width: 240px; }
+main.wide { max-width: 640px; margin: 0 auto; padding: 32px 16px; }
+h1 { font-size: 22px; margin: 0 0 8px; }
+h2 { font-size: 16px; margin: 28px 0 4px; }
+a { color: var(--accent); }
+li { margin: 6px 0; }
+.row { display: flex; gap: 8px; align-items: center; margin: 8px 0; flex-wrap: wrap; }
+code { background: var(--line); padding: 4px 8px; border-radius: 6px; font-size: 12px; word-break: break-all; }
+input { flex: 1; min-width: 200px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--fg); font: inherit; }
+button { font: inherit; padding: 7px 14px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--fg); cursor: pointer; }
+button.go { background: var(--accent); color: var(--on-accent); border-color: var(--accent); font-weight: 600; }
+button:disabled { opacity: .5; cursor: default; }
+.code { font: 600 28px ui-monospace, monospace; letter-spacing: .1em; }
+.muted { color: var(--muted); margin: 2px 0 12px; }

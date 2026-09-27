@@ -1,0 +1,32 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Gmail OTP Fill · Setup</title>
+<link rel="icon" href="icons/32.png">
+<link rel="stylesheet" href="ui.css">
+<main class="wide">
+  <h1>Gmail OTP Fill</h1>
+  <p>The extension reads your Gmail with your own Google OAuth client, so no one else's server ever sees your mail. Setup takes about 5 minutes.</p>
+
+  <ol>
+    <li>Open <a href="https://console.cloud.google.com/projectcreate" target="_blank">Google Cloud</a> and create a project.</li>
+    <li>Enable the <a href="https://console.cloud.google.com/apis/library/gmail.googleapis.com" target="_blank">Gmail API</a>.</li>
+    <li>On the <a href="https://console.cloud.google.com/auth/overview" target="_blank">Google Auth Platform</a>, pick <b>External</b>, then add your own Gmail under <b>Audience → Test users</b>.</li>
+    <li>Under <b>Clients → Create client</b>, pick <b>Web application</b> and add this <b>Authorized redirect URI</b>:
+      <div class="row"><code id="redirect"></code><button id="copy">Copy</button></div>
+    </li>
+    <li>Paste the client ID here:</li>
+  </ol>
+
+  <div class="row">
+    <input id="clientId" placeholder="1234-abc.apps.googleusercontent.com" spellcheck="false">
+    <button id="save">Save</button>
+  </div>
+
+  <h2>Account</h2>
+  <p id="status">Not connected.</p>
+  <div class="row">
+    <button id="connect" class="go">Connect Gmail</button>
+    <button id="disconnect">Disconnect</button>
+  </div>
+</main>
+<script src="options.js"></script>

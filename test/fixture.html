@@ -1,0 +1,21 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Fake 2FA</title>
+<script>
+  // Stub of the extension messaging API: first poll finds nothing, second finds a code.
+  let calls = 0;
+  window.chrome = { runtime: { sendMessage(msg, cb) {
+    window.lastMsg = msg;
+    if (msg.type === 'find') calls++;
+    setTimeout(() => cb(msg.type === 'find'
+      ? { ok: true, result: calls < 2 ? null : { id: 'm1', code: '482913', sender: 'Acme', subject: 'Your code', at: Date.now() } }
+      : { ok: true }), 10);
+  } } };
+</script>
+<h1>Check your email</h1>
+<p>We sent a 6-digit code to s***@gmail.com.</p>
+<div id="split">
+  <input maxlength="1"><input maxlength="1"><input maxlength="1">
+  <input maxlength="1"><input maxlength="1"><input maxlength="1">
+</div>
+<script src="../content.js"></script>
